@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Mining Dashboard Simulation</title>
+    <title>Cloud Mining Dashboard & Withdrawal</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -12,6 +12,7 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --success: #22c55e;
+            --danger: #ef4444;
         }
         body {
             font-family: 'Segoe UI', Roboto, sans-serif;
@@ -54,171 +55,6 @@
         .stat-value { font-size: 1.2rem; font-weight: bold; margin-top: 5px; }
 
         /* Tampilan Saldo Utama */
-        .balance-section {
-            background: linear-gradient(135deg, #1e1b4b, #311042);
-            padding: 20px;
-            border-radius: 16px;
-            text-align: center;
-            margin-bottom: 25px;
-            border: 1px solid rgba(56, 189, 248, 0.2);
-        }
-        .balance-crypto {
-            font-size: 2.2rem;
-            font-weight: bold;
-            color: var(--success);
-            font-family: monospace;
-        }
-        
-        /* Tombol Aksi */
-        .btn {
-            background: var(--accent-color);
-            color: #0f172a;
-            border: none;
-            padding: 14px;
-            width: 100%;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            margin-bottom: 10px;
-        }
-        .btn:hover { opacity: 0.9; }
-        .btn-outline {
-            background: transparent;
-            color: var(--text-main);
-            border: 1px solid var(--text-muted);
-        }
-    </style>
-</head>
-<body>
-
-<div class="dashboard">
-    <div class="header">
-        <h2>CRYPTO MINE PRO</h2>
-        <p>Status Penambangan: <span style="color: var(--success); font-weight: bold;">Aktif ●</span></p>
-    </div>
-
-    <!-- Saldo Berjalan -->
-    <div class="balance-section">
-        <div class="stat-label">TOTAL SALDO DIHASILKAN</div>
-        <div class="balance-crypto" id="crypto-balance">0.00000000</div>
-        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Mata Uang: USDT Sim</div>
-    </div>
-
-    <!-- Grid Status Pertambangan -->
-    <div class="stat-grid">
-        <div class="stat-card">
-            <div class="stat-label">Kecepatan Hash</div>
-            <div class="stat-value" id="hash-power">100.00 GH/s</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-row">
-                <div class="stat-label">Efisiensi Alat</div>
-                <div class="stat-value" style="color: var(--accent-color);">99.8%</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Simulasi Kontrol Interaktif -->
-    <button class="btn" onclick="upgradeHash()">Beli Tambahan Hashrate (+50 GH/s)</button>
-    <button class="btn btn-outline" onclick="resetSim()">Reset Simulasi</button>
-</div>
-
-<script>
-    // 1. Inisialisasi Data Penambangan
-    let baseHashRate = parseFloat(localStorage.getItem('prism_hash')) || 100.00; 
-    let currentBalance = parseFloat(localStorage.getItem('prism_balance')) || 0.00000000;
-    let lastSavedTime = parseInt(localStorage.getItem('prism_last_time')) || Date.now();
-
-    // 2. Kalkulator Efek Waktu Berjalan (Offline Earnings)
-    const now = Date.now();
-    const elapsedSeconds = (now - lastSavedTime) / 1000;
-    
-    // Logika perhitungan koin: Setiap 100 GH/s menghasilkan 0.00001 koin per detik
-    if (elapsedSeconds > 0) {
-        const earningsRate = (baseHashRate / 100) * 0.00001;
-        currentBalance += elapsedSeconds * earningsRate;
-    }
-
-    // 3. Loop Interval Real-Time (Setiap 100ms agar pergerakan angka mulus)
-    setInterval(() => {
-        const earningsRatePerSecond = (baseHashRate / 100) * 0.00001;
-        // Dibagi 10 karena interval berjalan setiap 100 milidetik (0.1 detik)
-        currentBalance += earningsRatePerSecond / 10; 
-        
-        // Simpan ke memori lokal browser
-        localStorage.setItem('prism_balance', currentBalance.toString());
-        localStorage.setItem('prism_last_time', Date.now().toString());
-        
-        updateDisplay();
-    }, 1000);
-
-    // 4. Update Tampilan Antarmuka
-    function updateDisplay() {
-        document.getElementById('crypto-balance').innerText = currentBalance.toFixed(8);
-        document.getElementById('hash-power').innerText = baseHashRate.toFixed(2) + " GH/s";
-    }
-
-    // 5. Fungsi Simulasi Beli Hashrate
-    function upgradeHash() {
-        baseHashRate += 50.00;
-        localStorage.setItem('prism_hash', baseHashRate.toString());
-        updateDisplay();
-    }
-
-    // 6. Fungsi Reset Data
-    function resetSim() {
-        if(confirm("Apakah Anda ingin mereset seluruh saldo simulasi?")) {
-            currentBalance = 0.00000000;
-            baseHashRate = 100.00;
-            localStorage.clear();
-            updateDisplay();
-        }
-    }
-
-    // Jalankan visualisasi awal saat memuat halaman
-    updateDisplay();
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Mining Dashboard & Withdrawal</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent-color: #38bdf8;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --success: #22c55e;
-            --danger: #ef4444;
-        }
-        body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-        .dashboard {
-            width: 100%;
-            max-width: 480px;
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .header h2 { margin: 0; font-size: 1.6rem; color: var(--accent-color); }
-        .header p { margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem; }
-        
         .balance-section {
             background: linear-gradient(135deg, #1e1b4b, #311042);
             padding: 20px;
@@ -290,21 +126,27 @@
         .status-success { color: var(--success); font-weight: bold; }
         .status-pending { color: #eab308; font-weight: bold; }
 
+        /* Tombol Aksi */
         .btn {
             background: var(--accent-color);
             color: #0f172a;
             border: none;
-            padding: 12px;
+            padding: 14px;
             width: 100%;
-            border-radius: 10px;
-            font-size: 0.95rem;
+            border-radius: 12px;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             transition: opacity 0.2s;
-            margin-top: 5px;
+            margin-bottom: 10px;
         }
         .btn:hover { opacity: 0.9; }
-        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--text-muted);
+        }
+        .btn-danger { background: var(--danger); color: white; margin-top: 20px; font-size: 0.8rem; padding: 8px; }
     </style>
 </head>
 <body>
@@ -312,18 +154,33 @@
 <div class="dashboard">
     <div class="header">
         <h2>CRYPTO MINE PRO</h2>
-        <p>Status Sistem: <span style="color: var(--success); font-weight: bold;">Berjalan Aktif ●</span></p>
+        <p>Status Penambangan: <span style="color: var(--success); font-weight: bold;">Aktif ●</span></p>
     </div>
 
-    <!-- Tampilan Saldo Utama -->
+    <!-- Tampilan Saldo Utama Berjalan -->
     <div class="balance-section">
-        <div style="font-size: 0.8rem; color: var(--text-muted);">SALDO YANG BISA DI-WITHDRAW</div>
+        <div class="stat-label">TOTAL SALDO DIHASILKAN</div>
         <div class="balance-crypto" id="crypto-balance">0.00000000</div>
         <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Mata Uang: USDT Sim</div>
     </div>
 
+    <!-- Grid Status Pertambangan -->
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-label">Kecepatan Hash</div>
+            <div class="stat-value" id="hash-power">100.00 GH/s</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Efisiensi Alat</div>
+            <div class="stat-value" style="color: var(--accent-color);">99.8%</div>
+        </div>
+    </div>
+
+    <!-- Simulasi Kontrol Interaktif -->
+    <button class="btn" onclick="upgradeHash()">Beli Tambahan Hashrate (+50 GH/s)</button>
+
     <!-- Menu Penarikan Dana (Withdraw Window) -->
-    <div class="withdraw-box">
+    <div class="withdraw-box" style="margin-top: 20px;">
         <h4>Panel Penarikan Dana</h4>
         <div class="input-group">
             <label for="wallet-addr">Alamat Dompet Kripto (USDT TRC-20)</label>
@@ -349,117 +206,80 @@
                 </tr>
             </thead>
             <tbody id="history-data">
-                <!-- Data transaksi akan disisipkan di sini via JS -->
+                <!-- Data transaksi masuk di sini -->
             </tbody>
         </table>
-        <button class="btn btn-danger" style="margin-top: 20px; font-size: 0.8rem; padding: 8px;" onclick="resetSim()">Reset Data Simulasi</button>
     </div>
+
+    <button class="btn btn-outline btn-danger" onclick="resetSim()">Reset Seluruh Simulasi</button>
 </div>
 
 <script>
-    // 1. Inisialisasi Data & Saldo Awal
+    // 1. Inisialisasi Data Penambangan & Transaksi
     const MIN_WITHDRAWAL = 10.00;
-    const MINING_SPEED = 0.0015; // Kecepatan tambang koin per detik untuk simulasi ini
-
+    let baseHashRate = parseFloat(localStorage.getItem('prism_hash')) || 100.00; 
     let currentBalance = parseFloat(localStorage.getItem('prism_balance')) || 0.00000000;
     let lastSavedTime = parseInt(localStorage.getItem('prism_last_time')) || Date.now();
     let txHistory = JSON.parse(localStorage.getItem('prism_history')) || [];
 
-    // 2. Hitung Pendapatan Selama Offline
+    // 2. Kalkulator Efek Waktu Berjalan (Offline Earnings)
     const now = Date.now();
     const elapsedSeconds = (now - lastSavedTime) / 1000;
+    
+    // Rumus: Setiap 100 GH/s menghasilkan 0.00001 koin per detik
     if (elapsedSeconds > 0) {
-        currentBalance += elapsedSeconds * MINING_SPEED;
+        const earningsRate = (baseHashRate / 100) * 0.00001;
+        currentBalance += elapsedSeconds * earningsRate;
     }
 
-    // 3. Loop Interval Real-Time untuk Menambah Saldo 
+    // 3. Loop Interval Real-Time (Berjalan mulus setiap detik)
     setInterval(() => {
-        // Dibagi 10 karena interval berulang setiap 100 milidetik (0.1 detik)
-        currentBalance += MINING_SPEED / 10; 
+        const earningsRatePerSecond = (baseHashRate / 100) * 0.00001;
+        currentBalance += earningsRatePerSecond; 
         
+        // Simpan ke memori lokal
         localStorage.setItem('prism_balance', currentBalance.toString());
         localStorage.setItem('prism_last_time', Date.now().toString());
         
-        document.getElementById('crypto-balance').innerText = currentBalance.toFixed(8);
+        updateDisplay();
     }, 1000);
 
-    // 4. Fungsi Memproses Penarikan (Withdrawal)
+    // 4. Update Tampilan Antarmuka
+    function updateDisplay() {
+        document.getElementById('crypto-balance').innerText = currentBalance.toFixed(8);
+        document.getElementById('hash-power').innerText = baseHashRate.toFixed(2) + " GH/s";
+    }
+
+    // 5. Fungsi Simulasi Beli Hashrate
+    function upgradeHash() {
+        baseHashRate += 50.00;
+        localStorage.setItem('prism_hash', baseHashRate.toString());
+        updateDisplay();
+    }
+
+    // 6. Fungsi Memproses Penarikan (Withdrawal)
     function processWithdrawal() {
         const walletInput = document.getElementById('wallet-addr').value.trim();
         const amountInput = parseFloat(document.getElementById('wd-amount').value);
 
-        // Validasi Alamat Wallet
         if (!walletInput) {
             alert("Gagal: Alamat dompet kripto tidak boleh kosong!");
             return;
         }
-
-        // Validasi Angka Input
         if (isNaN(amountInput) || amountInput <= 0) {
             alert("Gagal: Silakan masukkan jumlah penarikan yang valid!");
             return;
         }
-
-        // Validasi Batas Minimal Penarikan
         if (amountInput < MIN_WITHDRAWAL) {
             alert(`Gagal: Minimal penarikan adalah ${MIN_WITHDRAWAL} USDT!`);
             return;
         }
-
-        // Validasi Kecukupan Saldo
         if (amountInput > currentBalance) {
-            alert("Gagal: Saldo Anda tidak mencukupi untuk melakukan penarikan ini!");
+            alert("Gagal: Saldo Anda tidak mencukupi!");
             return;
         }
 
-        // Proses Pemotongan Saldo Berhasil
+        // Jalankan pemotongan saldo jika validasi lolos
         currentBalance -= amountInput;
         localStorage.setItem('prism_balance', currentBalance.toString());
 
-        // Format Waktu Penarikan
-        const dateObj = new Date();
-        const timeString = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-
-        // Simpan Transaksi Baru ke Riwayat
-        const newTx = {
-            time: timeString,
-            amount: amountInput.toFixed(2) + " USDT",
-            status: "Sukses" // Bisa diubah ke "Pending" untuk kebutuhan visualisasi simulasi antrean
-        };
-        
-        txHistory.unshift(newTx); // Tambahkan transaksi baru di baris paling atas
-        localStorage.setItem('prism_history', JSON.stringify(txHistory));
-
-        // Bersihkan Form Input & Perbarui Tampilan
-        document.getElementById('wd-amount').value = '';
-        document.getElementById('wallet-addr').value = '';
-        updateHistoryTable();
-        alert(`Berhasil: Penarikan sebesar ${amountInput} USDT berhasil diproses ke alamat dompet Anda.`);
-    }
-
-    // 5. Fungsi Render Ulang Tabel Riwayat
-    function updateHistoryTable() {
-        const tbody = document.getElementById('history-data');
-        tbody.innerHTML = ''; // Kosongkan tabel sebelum diisi ulang
-
-        if (txHistory.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">Belum ada riwayat transaksi</td></tr>`;
-            return;
-        }
-
-        txHistory.forEach(tx => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${tx.time}</td>
-                <td>${tx.amount}</td>
-                <td class="${tx.status === 'Sukses' ? 'status-success' : 'status-pending'}">${tx.status}</td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-
-</script>
-
-</body>
-</html>

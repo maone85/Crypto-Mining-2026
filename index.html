@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Mining Multi-Level & Withdrawal System</title>
+    <!-- Script Resmi SDK Telegram -->
+    <script src="https://telegram.org"></script>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -95,8 +97,8 @@
 
 <div class="dashboard">
     <div class="header">
-        <h2>CRYPTO MINE BUSINESS</h2>
-        <p style="margin:4px 0 0; font-size:0.85rem; color:var(--text-muted);">Sistem Otomatis Real-Time 24 Jam [A]</p>
+        <h2 id="tg-username">CRYPTO MINE BUSINESS</h2>
+        <p style="margin:4px 0 0; font-size:0.85rem; color:var(--text-muted);">Sistem Otomatis Real-Time 24 Jam</p>
     </div>
 
     <!-- Tampilan Utama Profit -->
@@ -118,7 +120,7 @@
             <div class="info-value" id="display-rate" style="color:var(--success);">1.7% / hari</div>
         </div>
         <div class="info-card">
-            <div class="info-label">Simulasi Jumlah Deposit</div>
+            <div class="info-label">Simulasi Deposit</div>
             <div class="info-value" id="display-deposit">5.00 USD</div>
         </div>
         <div class="info-card">
@@ -133,15 +135,15 @@
         <div class="input-group">
             <label>Pilih Level Akun untuk Simulasi Data:</label>
             <select id="select-level" onchange="changeSimulatedLevel()">
-                <option value="1">Level 1 (Deposit $5, Profit 1.7%)</option>
-                <option value="2">Level 2 (Refferal 10, Bonus Rp50k, Profit 1.8%)</option>
-                <option value="3">Level 3 (2 Tim Lvl 2, Bonus Rp100k, Profit 1.9%)</option>
-                <option value="4">Level 4 (2 Tim Lvl 3, Bonus Rp200k, Profit 2.0%)</option>
-                <option value="5">Level 5 (2 Tim Lvl 4, Bonus Rp400k, Profit 2.1%)</option>
-                <option value="6">Level 6 (2 Tim Lvl 5, Bonus Rp800k, Profit 2.2%)</option>
-                <option value="7">Level 7 (2 Tim Lvl 6, Bonus Rp1.6M, Profit 2.3%)</option>
-                <option value="8">Level 8 (2 Tim Lvl 7, Bonus Rp3.2M, Profit 2.4%)</option>
-                <option value="9">Level 9 (2 Tim Lvl 8, Bonus Rp6.4M, Profit 2.5%)</option>
+                <option value="1">Level 1 (Deposit $5, Profit 1.7%, 30 Hari)</option>
+                <option value="2">Level 2 (Refferal 10, Bonus Rp50k, Profit 1.8%, 30 Hari)</option>
+                <option value="3">Level 3 (2 Tim Lvl 2, Bonus Rp100k, Profit 1.9%, 30 Hari)</option>
+                <option value="4">Level 4 (2 Tim Lvl 3, Bonus Rp200k, Profit 2.0%, 30 Hari)</option>
+                <option value="5">Level 5 (2 Tim Lvl 4, Bonus Rp400k, Profit 2.1%, 30 Hari)</option>
+                <option value="6">Level 6 (2 Tim Lvl 5, Bonus Rp800k, Profit 2.2%, 30 Hari)</option>
+                <option value="7">Level 7 (2 Tim Lvl 6, Bonus Rp1.6M, Profit 2.3%, 30 Hari)</option>
+                <option value="8">Level 8 (2 Tim Lvl 7, Bonus Rp3.2M, Profit 2.4%, 30 Hari)</option>
+                <option value="9">Level 9 (2 Tim Lvl 8, Bonus Rp6.4M, Profit 2.5%, 30 Hari)</option>
             </select>
         </div>
     </div>
@@ -158,8 +160,8 @@
             </select>
         </div>
         <div class="input-group">
-            <label id="label-destination">Alamat Dompet / Nomor HP</label>
-            <input type="text" id="wd-destination" placeholder="0x... atau 08...">
+            <label id="label-destination">Alamat Dompet Kripto (Jaringan BEP-20)</label>
+            <input type="text" id="wd-destination" placeholder="Masukkan alamat dompet atau nomor HP...">
         </div>
         <div class="input-group">
             <label>Jumlah Nominal Penarikan</label>
@@ -192,30 +194,35 @@
 </div>
 
 <script>
-    // Konfigurasi Parameter Tingkat Level
+    // Inisialisasi SDK Telegram WebApp
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand(); 
+
+    // Tampilkan Nama Pengguna dari Telegram Asli
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        document.getElementById('tg-username').innerText = `Halo, ${tg.initDataUnsafe.user.first_name}!`;
+    }
+
+    // Konfigurasi Parameter Tingkat Level Sesuai Aturan Bisnis
     const LEVEL_CONFIGS = {
-        1: { rate: 0.017, deposit: 5, bonus: 0, desc: "Min deposit $5" },
-        2: { rate: 0.018, deposit: 25, bonus: 50000, desc: "10 Refferal" },
-        3: { rate: 0.019, deposit: 75, bonus: 100000, desc: "2 Tim Naik Lvl 2" },
-        4: { rate: 0.020, deposit: 150, bonus: 200000, desc: "2 Tim Naik Lvl 3" },
-        5: { rate: 0.021, deposit: 300, bonus: 400000, desc: "2 Tim Naik Lvl 4" },
-        6: { rate: 0.022, deposit: 600, bonus: 800000, desc: "2 Tim Naik Lvl 5" },
-        7: { rate: 0.023, deposit: 1200, bonus: 1600000, desc: "2 Tim Naik Lvl 6" },
-        8: { rate: 0.024, deposit: 2500, bonus: 3200000, desc: "2 Tim Naik Lvl 7" },
-        9: { rate: 0.025, deposit: 5000, bonus: 6400000, desc: "2 Tim Naik Lvl 8" }
+        1: { rate: 0.017, deposit: 5, bonus: 0 },
+        2: { rate: 0.018, deposit: 25, bonus: 50000 },
+        3: { rate: 0.019, deposit: 75, bonus: 100000 },
+        4: { rate: 0.020, deposit: 150, bonus: 200000 },
+        5: { rate: 0.021, deposit: 300, bonus: 400000 },
+        6: { rate: 0.022, deposit: 600, bonus: 800000 },
+        7: { rate: 0.023, deposit: 1200, bonus: 1600000 },
+        8: { rate: 0.024, deposit: 2500, bonus: 3200000 },
+        9: { rate: 0.025, deposit: 5000, bonus: 6400000 }
     };
 
-    // State Awal Program
+    // Memuat State Data dari Local Storage Browser
     let userLevel = parseInt(localStorage.getItem('m_level')) || 1;
     let miningBalance = parseFloat(localStorage.getItem('m_balance')) || 0.0;
     let devBonusWallet = parseFloat(localStorage.getItem('m_bonus')) || 0.0;
     let lastSavedTimestamp = parseInt(localStorage.getItem('m_time')) || Date.now();
     let txnHistory = JSON.parse(localStorage.getItem('m_txns')) || [];
 
-    // Hitung Pendapatan Berjalan Selama Pengguna Offline (24 Jam Akumulatif) [A]
+    // Kalkulasi Pendapatan Akumulatif Selama Pengguna Offline
     const currentNow = Date.now();
-    const elapsedSecs = (currentNow - lastSavedTimestamp) / 1000;
-    if (elapsedSecs > 0) {
-        let activeConfig = LEVEL_CONFIGS[userLevel];
-        // Rumus pendapatan per detik: (Deposit * Rate Hari) / 86400 Detik
-        let earningsPerSec = (activeConfig.deposit * activeConfig.rate) / 86400;

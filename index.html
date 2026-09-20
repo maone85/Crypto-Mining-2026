@@ -3,150 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Mining Mini App</title>
-    <!-- Script Resmi SDK Telegram -->
-    <script src="https://telegram.org"></script>
+    <title>Cloud Mining Dashboard & Withdrawal</title>
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1c1c1e;
-            color: #ffffff;
-            text-align: center;
-            padding: 20px;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
         }
-        .container {
-            max-width: 400px;
-            margin: 30px auto;
-            background: #2c2c2e;
+        .dashboard {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border-radius: 24px;
             padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        .balance {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #f39c12;
-            margin: 15px 0;
-        }
-        .mining-pool {
-            font-size: 1.3rem;
-            color: #2ecc71;
-            font-weight: bold;
+        .header {
+            text-align: center;
             margin-bottom: 25px;
         }
-        button {
-            background-color: #007aff;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.1rem;
-            border-radius: 12px;
-            cursor: pointer;
-            width: 100%;
+        .header h2 { margin: 0; font-size: 1.6rem; color: var(--accent-color); }
+        .header p { margin: 5px 0 0; color: var(--text-muted); font-size: 0.9rem; }
+        
+        .balance-section {
+            background: linear-gradient(135deg, #1e1b4b, #311042);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 25px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+        .balance-crypto {
+            font-size: 2.2rem;
             font-weight: bold;
-            transition: background 0.2s;
+            color: var(--success);
+            font-family: monospace;
         }
-        button:disabled {
-            background-color: #48484a;
-            cursor: not-allowed;
+        
+        /* Form Penarikan Dana */
+        .withdraw-box {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
+        .withdraw-box h4 { margin: 0 0 15px 0; color: var(--accent-color); }
+        .input-group {
+            margin-bottom: 12px;
+            text-align: left;
+        }
+        .input-group label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: white;
+            box-sizing: border-box;
+        }
+        .min-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: -5px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        /* Tabel Riwayat */
+        .history-section {
+            margin-top: 25px;
+            text-align: left;
+        }
+        .history-section h4 { margin: 0 0 10px 0; color: var(--text-muted); }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .history-table th, .history-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+        .history-table th { color: var(--text-muted); font-weight: normal; }
+        .status-success { color: var(--success); font-weight: bold; }
+        .status-pending { color: #eab308; font-weight: bold; }
+
+        .btn {
+            background: var(--accent-color);
+            color: #0f172a;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-top: 5px;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn-danger { background: var(--danger); color: white; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h3 id="username">Halo, Penambang!</h3>
-        <p>Total Saldo Koin Anda:</p>
-        <div class="balance" id="total-balance">0.0000</div>
-
-        <div style="border-top: 1px solid #3a3a3c; margin: 20px 0;"></div>
-
-        <p>Koin Ditambang (Maks 10.0000):</p>
-        <div class="mining-pool" id="mined-pool">0.0000</div>
-
-        <button id="claim-btn" onclick="claimCoins()">Klaim Hasil Tambang</button>
+<div class="dashboard">
+    <div class="header">
+        <h2>PRISM HASH PRO</h2>
+        <p>Status Sistem: <span style="color: var(--success); font-weight: bold;">Berjalan Aktif ●</span></p>
     </div>
 
-    <script>
-        // 1. Inisialisasi Telegram Web App
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand(); // Membuka aplikasi dalam mode layar penuh
+    <!-- Tampilan Saldo Utama -->
+    <div class="balance-section">
+        <div style="font-size: 0.8rem; color: var(--text-muted);">SALDO YANG BISA DI-WITHDRAW</div>
+        <div class="balance-crypto" id="crypto-balance">0.00000000</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Mata Uang: USDT Sim</div>
+    </div>
 
-        // Menampilkan nama depan user Telegram jika tersedia
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('username').innerText = `Halo, ${tg.initDataUnsafe.user.first_name}!`;
-        }
+    <!-- Menu Penarikan Dana (Withdraw Window) -->
+    <div class="withdraw-box">
+        <h4>Panel Penarikan Dana</h4>
+        <div class="input-group">
+            <label for="wallet-addr">Alamat Dompet Kripto (USDT TRC-20)</label>
+            <input type="text" id="wallet-addr" placeholder="Masukkan alamat dompet Anda...">
+        </div>
+        <div class="input-group">
+            <label for="wd-amount">Jumlah Penarikan (USDT)</label>
+            <input type="number" id="wd-amount" step="any" placeholder="0.00">
+        </div>
+        <div class="min-text">⚠️ Batas minimal penarikan: <span style="color: white; font-weight: bold;">10.00 USDT</span></div>
+        <button class="btn" onclick="processWithdrawal()">Ajukan Penarikan</button>
+    </div>
 
-        // 2. Konfigurasi Sistem Tambang
-        const MINING_RATE = 0.001; // Jumlah koin yang didapat per detik
-        const MAX_POOL = 10.0;     // Batas maksimal penampungan sebelum diklaim
+    <!-- Tabel Riwayat Transaksi -->
+    <div class="history-section">
+        <h4>Riwayat Transaksi Terbaru</h4>
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Waktu</th>
+                    <th>Jumlah</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="history-data">
+                <!-- Data transaksi akan disisipkan di sini via JS -->
+            </tbody>
+        </table>
+        <button class="btn btn-danger" style="margin-top: 20px; font-size: 0.8rem; padding: 8px;" onclick="resetSim()">Reset Data Simulasi</button>
+    </div>
+</div>
 
-        // 3. Memuat Data dari Penyimpanan Lokal (Local Storage)
-        let totalBalance = parseFloat(localStorage.getItem('totalBalance')) || 0.0;
-        let minedPool = parseFloat(localStorage.getItem('minedPool')) || 0.0;
-        let lastTime = parseInt(localStorage.getItem('lastTime')) || Date.now();
+<script>
+    // 1. Inisialisasi Data & Saldo Awal
+    const MIN_WITHDRAWAL = 10.00;
+    const MINING_SPEED = 0.0015; // Kecepatan tambang koin per detik untuk simulasi ini
 
-        // 4. Hitung Pendapatan Offline (Waktu Berjalan Saat Aplikasi Ditutup)
-        const now = Date.now();
-        const elapsedSeconds = Math.floor((now - lastTime) / 1000);
+    let currentBalance = parseFloat(localStorage.getItem('prism_balance')) || 0.00000000;
+    let lastSavedTime = parseInt(localStorage.getItem('prism_last_time')) || Date.now();
+    let txHistory = JSON.parse(localStorage.getItem('prism_history')) || [];
+
+    // 2. Hitung Pendapatan Selama Offline
+    const now = Date.now();
+    const elapsedSeconds = (now - lastSavedTime) / 1000;
+    if (elapsedSeconds > 0) {
+        currentBalance += elapsedSeconds * MINING_SPEED;
+    }
+
+    // 3. Loop Interval Real-Time untuk Menambah Saldo 
+    setInterval(() => {
+        // Dibagi 10 karena interval berulang setiap 100 milidetik (0.1 detik)
+        currentBalance += MINING_SPEED / 10; 
         
-        if (elapsedSeconds > 0) {
-            minedPool += elapsedSeconds * MINING_RATE;
-            if (minedPool > MAX_POOL) minedPool = MAX_POOL; // Batasi sesuai kapasitas maksimum
+        localStorage.setItem('prism_balance', currentBalance.toString());
+        localStorage.setItem('prism_last_time', Date.now().toString());
+        
+        document.getElementById('crypto-balance').innerText = currentBalance.toFixed(8);
+    }, 1000);
+
+    // 4. Fungsi Memproses Penarikan (Withdrawal)
+    function processWithdrawal() {
+        const walletInput = document.getElementById('wallet-addr').value.trim();
+        const amountInput = parseFloat(document.getElementById('wd-amount').value);
+
+        // Validasi Alamat Wallet
+        if (!walletInput) {
+            alert("Gagal: Alamat dompet kripto tidak boleh kosong!");
+            return;
         }
 
-        // 5. Loop Utama: Menambah Koin Setiap Detik Real-Time
-        setInterval(() => {
-            if (minedPool < MAX_POOL) {
-                minedPool += MINING_RATE;
-                if (minedPool > MAX_POOL) minedPool = MAX_POOL;
-            }
-            
-            // Simpan jejak waktu dan koin terbaru
-            localStorage.setItem('lastTime', Date.now().toString());
-            localStorage.setItem('minedPool', minedPool.toString());
-            
-            updateUI();
-        }, 1000);
-
-        // 6. Fungsi Memperbarui Tampilan Aplikasi
-        function updateUI() {
-            document.getElementById('total-balance').innerText = totalBalance.toFixed(4);
-            document.getElementById('mined-pool').innerText = minedPool.toFixed(4);
-            
-            const claimBtn = document.getElementById('claim-btn');
-            if (minedPool <= 0) {
-                claimBtn.disabled = true;
-                claimBtn.innerText = "Sedang Menambang...";
-            } else {
-                claimBtn.disabled = false;
-                claimBtn.innerText = "Klaim Hasil Tambang";
-            }
+        // Validasi Angka Input
+        if (isNaN(amountInput) || amountInput <= 0) {
+            alert("Gagal: Silakan masukkan jumlah penarikan yang valid!");
+            return;
         }
 
-        // 7. Fungsi Klaim Koin ke Saldo Utama
-        function claimCoins() {
-            if (minedPool > 0) {
-                totalBalance += minedPool;
-                minedPool = 0;
-                
-                // Simpan pembaruan permanen di browser hpt
-                localStorage.setItem('totalBalance', totalBalance.toString());
-                localStorage.setItem('minedPool', minedPool.toString());
-                
-                updateUI();
-                
-                // Efek getar HP jika dibuka di aplikasi Telegram mobile
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred('success');
-                }
-            }
+        // Validasi Batas Minimal Penarikan
+        if (amountInput < MIN_WITHDRAWAL) {
+            alert(`Gagal: Minimal penarikan adalah ${MIN_WITHDRAWAL} USDT!`);
+            return;
         }
 
-        // Jalankan UI pertama kali saat aplikasi dibuka
-        updateUI();
-    </script>
-</body>
-</html>
+        // Validasi Kecukupan Saldo
+        if (amountInput > currentBalance) {
+            alert("Gagal: Saldo Anda tidak mencukupi untuk melakukan penarikan ini!");
+            return;
+        }
+
+        // Proses Pemotongan Saldo Berhasil
+        currentBalance -= amountInput;
+        localStorage.setItem('prism_balance', currentBalance.toString());
+
+        // Format Waktu Penarikan
+        const dateObj = new Date();
+        const timeString = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+        // Simpan Transaksi Baru ke Riwayat
+        const newTx = {
+            time: timeString,
+            amount: amountInput.toFixed(2) + " USDT",
+            status: "Sukses" // Bisa diubah ke "Pending" untuk kebutuhan visualisasi simulasi antrean
+        };
+        
+        txHistory.unshift(newTx); // Tambahkan transaksi baru di baris paling atas
+        localStorage.setItem('prism_history', JSON.stringify(txHistory));
+
+        // Bersihkan Form Input & Perbarui Tampilan
+        document.getElementById('wd-amount').value = '';
+        document.getElementById('wallet-addr').value = '';
+        updateHistoryTable();
+        alert(`Berhasil: Penarikan sebesar ${amountInput} USDT berhasil diproses ke alamat dompet Anda.`);
+    }
+
+    // 5. Fungsi Render Ulang Tabel Riwayat
+    function updateHistoryTable() {
+        const tbody = document.getElementById('history-data');
+        tbody.innerHTML = ''; // Kosongkan tabel sebelum diisi ulang
+
+        if (txHistory.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">Belum ada riwayat transaksi</td></tr>`;
+            return;
+        }
+
+        txHistory.forEach(tx => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${tx.time}</td>
+                <td>${tx.amount}</td>
+                <td class="${tx.status === 'Sukses' ? 'status-success' : 'status-pending'}">${tx.status}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Mining Mini App</title>
+    <!-- Script Resmi SDK Telegram -->
+    <script src="https://telegram.org"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1c1c1e;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 400px;
+            margin: 30px auto;
+            background: #2c2c2e;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        .balance {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #f39c12;
+            margin: 15px 0;
+        }
+        .mining-pool {
+            font-size: 1.3rem;
+            color: #2ecc71;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+        button {
+            background-color: #007aff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:disabled {
+            background-color: #48484a;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h3 id="username">Halo, Penambang!</h3>
+        <p>Total Saldo Koin Anda:</p>
+        <div class="balance" id="total-balance">0.0000</div>
+
+        <div style="border-top: 1px solid #3a3a3c; margin: 20px 0;"></div>
+
+        <p>Koin Ditambang (Maks 10.0000):</p>
+        <div class="mining-pool" id="mined-pool">0.0000</div>
+
+        <button id="claim-btn" onclick="claimCoins()">Klaim Hasil Tambang</button>
+    </div>
+
+    <script>
+        // 1. Inisialisasi Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand(); // Membuka aplikasi dalam mode layar penuh
+
+        // Menampilkan nama depan user Telegram jika tersedia
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            document.getElementById('username').innerText = `Halo, ${tg.initDataUnsafe.user.first_name}!`;
+        }
+
+        // 2. Konfigurasi Sistem Tambang
+        const MINING_RATE = 0.001; // Jumlah koin yang didapat per detik
+        const MAX_POOL = 10.0;     // Batas maksimal penampungan sebelum diklaim
+
+        // 3. Memuat Data dari Penyimpanan Lokal (Local Storage)
+        let totalBalance = parseFloat(localStorage.getItem('totalBalance')) || 0.0;
+        let minedPool = parseFloat(localStorage.getItem('minedPool')) || 0.0;
+        let lastTime = parseInt(localStorage.getItem('lastTime')) || Date.now();
+
+        // 4. Hitung Pendapatan Offline (Waktu Berjalan Saat Aplikasi Ditutup)
+        const now = Date.now();
+        const elapsedSeconds = Math.floor((now - lastTime) / 1000);
+        
+        if (elapsedSeconds > 0) {
+            minedPool += elapsedSeconds * MINING_RATE;
+            if (minedPool > MAX_POOL) minedPool = MAX_POOL; // Batasi sesuai kapasitas maksimum
+        }
+
+        // 5. Loop Utama: Menambah Koin Setiap Detik Real-Time
+        setInterval(() => {
+            if (minedPool < MAX_POOL) {
+                minedPool += MINING_RATE;
+                if (minedPool > MAX_POOL) minedPool = MAX_POOL;
+            }
+            
+            // Simpan jejak waktu dan koin terbaru
+            localStorage.setItem('lastTime', Date.now().toString());
+            localStorage.setItem('minedPool', minedPool.toString());
+            
+            updateUI();
+        }, 1000);
+
+        // 6. Fungsi Memperbarui Tampilan Aplikasi
+        function updateUI() {
+            document.getElementById('total-balance').innerText = totalBalance.toFixed(4);
+            document.getElementById('mined-pool').innerText = minedPool.toFixed(4);
+            
+            const claimBtn = document.getElementById('claim-btn');
+            if (minedPool <= 0) {
+                claimBtn.disabled = true;
+                claimBtn.innerText = "Sedang Menambang...";
+            } else {
+                claimBtn.disabled = false;
+                claimBtn.innerText = "Klaim Hasil Tambang";
+            }
+        }
+
+        // 7. Fungsi Klaim Koin ke Saldo Utama
+        function claimCoins() {
+            if (minedPool > 0) {
+                totalBalance += minedPool;
+                minedPool = 0;
+                
+                // Simpan pembaruan permanen di browser hpt
+                localStorage.setItem('totalBalance', totalBalance.toString());
+                localStorage.setItem('minedPool', minedPool.toString());
+                
+                updateUI();
+                
+                // Efek getar HP jika dibuka di aplikasi Telegram mobile
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+            }
+        }
+
+        // Jalankan UI pertama kali saat aplikasi dibuka
+        updateUI();
+    </script>
+</body>
+</html>
